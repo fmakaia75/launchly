@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ——————————————————————————————————————————
+   AI Product Launch Studio — style system
+   Direction: "paper-minimal" (blanc, net, micro-texture)
+—————————————————————————————————————————— */
+
+:root {
+  --paper: 252 251 248;
+  --paper2: 246 245 242;
+  --ink: 13 14 18;
+  --muted: 92 96 108;
+  --accent: 22 87 255;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  color: rgb(var(--ink));
+  font-family: var(--font-body);
+  background: linear-gradient(180deg, rgb(var(--paper)), rgb(var(--paper2)));
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Minimal micro-grain (no obvious grid) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.12;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='280'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='280' height='280' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+}
+
+/* Fine selection */
+::selection {
+  background: rgba(22, 87, 255, 0.18);
+}
+
+/* Utility: subtle border */
+.border-ink {
+  border-color: rgba(0, 0, 0, 0.14);
+}
+
+/* Utility: hairline divider */
+.hairline {
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.16), transparent);
+}

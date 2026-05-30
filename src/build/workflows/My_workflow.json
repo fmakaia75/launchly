@@ -1,0 +1,246 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "e32d9150-7c23-4e30-b20b-dceecc6f6f2c",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -700,
+        -80
+      ],
+      "id": "7be895e6-450c-4141-b47e-17184098aeda",
+      "name": "Webhook",
+      "webhookId": "e32d9150-7c23-4e30-b20b-dceecc6f6f2c"
+    },
+    {
+      "parameters": {
+        "model": "gemma4:e2b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -140,
+        280
+      ],
+      "id": "f8e88ed7-0497-42c0-81a5-836a72c8ace2",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "ABE7kgR4EMmJFbOu",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gemma4:e2b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -140,
+        -120
+      ],
+      "id": "84ab5c79-24cd-4885-b985-15736499f1b6",
+      "name": "Ollama Chat Model1",
+      "credentials": {
+        "ollamaApi": {
+          "id": "ABE7kgR4EMmJFbOu",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a senior LinkedIn copywriter specialized in product launches (B2B/B2C). Write posts that feel human and are easy to read on mobile.\n\nRULES:\n\nLanguage: English.\nStyle: direct, concrete, short paragraphs (often 1–2 lines). No fluff.\nAvoid AI hype + empty claims (don’t use “revolutionary”, “game-changer”, “world-class”).\nPrefer specifics: who it’s for, what problem it solves, what changes, the outcome.\nStructure for each post: HOOK → VALUE → PROOF (even light) → CTA.\nAdd 5–12 relevant hashtags at the end (avoid generic hashtags).\nEmojis: 0–2 max, only if they help scannability.\nNo links unless I explicitly ask.\nLength per post: ~900–1,600 characters.\nCONTEXT (fill this in):\n\nProduct description: {{ $json.body.description }}\nProduct name: {{ $json.body.name }}\nOne-liner: {ONE_LINER}\nTarget audience: {{$json.body.audience }}\n\nTASK: Generate 3 different LinkedIn posts:\n\nANNOUNCEMENT post (hook + benefit + max 5 bullets + CTA)\nFRAMEWORK/LEARNING post (teach one insight + tie it back to the product + CTA)\nCALL FOR TESTERS post (invite beta/pilot + clarify who it’s for + CTA)\nOUTPUT FORMAT (IMPORTANT): POST 1: [write the full post] HASHTAGS: [5–12 hashtags]\nPOST 2: [write the full post] HASHTAGS: [5–12 hashtags]\nPOST 3: [write the full post] HASHTAGS: [5–12 hashtags]\n\nReturn only the posts in the exact format above—no extra commentary. ",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        -60,
+        -360
+      ],
+      "id": "99905da3-6841-4c07-9157-6b7561c3dbea",
+      "name": "AI PROMPT FOR SOCIAL"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a creative director + PixVerse prompt engineer. Generate ONE PixVerse text-to-video prompt for a short ad clip (5–8 seconds) based on the product info below.\n\nRULES:\n\nLanguage: English.\nOutput must be practical for PixVerse.\nOne paragraph prompt only (no lists).\nInclude: subject, setting, lighting, camera movement, composition, mood, and key action.\nKeep it premium and minimal. No copyrighted IP. No vague fluff.\nAdd a negative prompt to avoid common bad artifacts.\nINPUT:\n\nProduct name: {{ $json.body.name }}\nProduct description: {{ $json.body.description}}\nTarget audience: {{ $json.body.audience }}\nTASK: Create a short video concept that makes the product’s value obvious to the target audience in 5–8 seconds.\n\nOUTPUT FORMAT (STRICT): negative_prompt: {one line}\n\nprompt: {one paragraph, ready to paste into PixVerse}\n\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        -80,
+        40
+      ],
+      "id": "a1d03ac6-bbde-4eff-8a56-26f1302f677a",
+      "name": "SCRIPT CONTENT"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://app-api.pixverse.ai/openapi/v2/video/text/generate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "API-KEY",
+              "value": "YOUR_PIXVERSE_API_KEY"
+            },
+            {
+              "name": "Ai-trace-id",
+              "value": "different-ai-trace-id-for-each-unique-request"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"prompt\": \"{{ $json.prompt }}\",\n  \"negative_prompt\": \"{{ $json.negative_prompt }}\",\n  \"aspect_ratio\": \"16:9\",\n  \"duration\": 5,\n  \"model\": \"v4.5\",\n  \"motion_mode\": \"normal\",\n  \"quality\": \"540p\",\n  \"seed\": 0,\n  \"water_mark\": false\n}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        40
+      ],
+      "id": "50f22bbb-bee1-440d-9f5a-5e44ee9c0ad5",
+      "name": "Piverse API"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        480,
+        -200
+      ],
+      "id": "f47eda09-7544-4490-8109-88eadbc61feb",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = $input.first().json.output;\nconst [negPart, promptPart] = output.split('\\n\\n');\n\nreturn [{\n  json: {\n    negative_prompt: negPart.replace('negative_prompt: ', ''),\n    prompt: promptPart.replace('prompt: ', '')\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        40
+      ],
+      "id": "c25bdfe0-6756-4010-b595-52d1e380dea5",
+      "name": "Code"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "SCRIPT CONTENT",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI PROMPT FOR SOCIAL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "SCRIPT CONTENT",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI PROMPT FOR SOCIAL",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SCRIPT CONTENT": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI PROMPT FOR SOCIAL": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Piverse API": {
+      "main": [
+        []
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Piverse API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c46a518d-58eb-4e20-a534-322d0ebdade8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f7b7877415e64e2c436872d90489209d4b26088820b8e1df500eb309d01c6bfb"
+  },
+  "id": "CIGVE4ISEhERrx3p",
+  "tags": []
+}
