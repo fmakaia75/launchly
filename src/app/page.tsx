@@ -49,12 +49,9 @@ export default function Page() {
                 <div className="aspect-video overflow-hidden bg-[rgba(0,0,0,0.03)]">
                   <HeroVideo />
                 </div>
-                <div className="mt-4 flex items-center justify-between">
+                <div className="mt-4">
                   <p className="text-[10px] tracking-[0.2em] uppercase text-[rgba(0,0,0,0.35)]">
                     Demo video
-                  </p>
-                  <p className="text-[11px] text-[rgba(0,0,0,0.45)]">
-                    Set <span className="font-mono">NEXT_PUBLIC_HERO_VIDEO_URL</span>
                   </p>
                 </div>
               </div>

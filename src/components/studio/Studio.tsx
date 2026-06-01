@@ -20,7 +20,7 @@ export default function Studio() {
   const startWebhookUrl = useMemo(() => {
     return (
       process.env.NEXT_PUBLIC_N8N_START_WEBHOOK_URL ||
-      "http://localhost:5678/webhook/pixverse-launch"
+      "http://localhost:5678/webhook-test/e32d9150-7c23-4e30-b20b-dceecc6f6f2c"
     );
   }, []);
 
@@ -34,42 +34,21 @@ export default function Studio() {
         ? crypto.randomUUID()
         : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
-    try {
-      const res = await fetch(startWebhookUrl, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          jobId: clientJobId,
-          name: name.trim(),
-          description: description.trim(),
-          audience: audience.trim(),
-          images: images.map((img) => ({ name: img.file.name, size: img.file.size, type: img.file.type })),
-        }),
-      });
-      if (!res.ok) {
-        setErrorMsg(`Request failed: ${res.status} ${res.statusText}`);
-        setStatus("error");
-        return;
-      }
+    // Redirect immediately — don’t wait for n8n to finish
+    router.push(`/results/${encodeURIComponent(clientJobId)}`);
 
-      // If n8n returns a job id, use it. Otherwise fall back to the client-generated one.
-      let jobId = clientJobId;
-      const contentType = res.headers.get("content-type") || "";
-      if (contentType.includes("application/json")) {
-        try {
-          const json = (await res.json()) as any;
-          jobId = json?.jobId || json?.id || json?.executionId || jobId;
-        } catch {
-          // ignore
-        }
-      }
-
-      setStatus("success");
-      router.push(`/results/${encodeURIComponent(jobId)}`);
-    } catch {
-      setErrorMsg("Could not reach n8n. Make sure it’s running and the webhook URL is correct.");
-      setStatus("error");
-    }
+    // Fire the webhook in the background
+    fetch(startWebhookUrl, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        jobId: clientJobId,
+        name: name.trim(),
+        description: description.trim(),
+        audience: audience.trim(),
+        images: images.map((img) => ({ name: img.file.name, size: img.file.size, type: img.file.type })),
+      }),
+    }).catch(() => null);
   }
 
   function onImagesChange(files: FileList | null) {
